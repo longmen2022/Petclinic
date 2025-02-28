@@ -27,7 +27,30 @@ pipeline {
                 }
             }
         }
-        stage('Pushing to Docker') {
+        
+
+
+stage("Push image"){
+    steps{
+        script{
+            sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 471112503258.dkr.ecr.us-east-1.amazonaws.com"
+            sh "docker push 471112503258.dkr.ecr.us-east-1.amazonaws.com/my-docker-repo:latest"
+        }
+
+    }
+}
+        stage ('Helm Deploy') {
+          steps {
+            script {
+                sh "helm upgrade first --install mychart --namespace helm-deployment --set image.tag=$BUILD_NUMBER"
+                }
+            }
+        }
+    }
+}
+
+
+stage('Pushing to Docker') {
             steps {
                 script {
                     sh """
@@ -42,3 +65,4 @@ pipeline {
         }
     }
 }
+
